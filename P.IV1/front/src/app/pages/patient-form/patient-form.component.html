@@ -1,0 +1,117 @@
+<div class="form-dashboard">
+  
+  <header class="dashboard-header">
+    <div class="header-titles">
+      <a routerLink="/patients" class="back-link">
+        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Voltar para pacientes
+      </a>
+      <h1>Novo Paciente</h1>
+      <p>Preencha as informações para cadastrar um novo paciente no sistema.</p>
+    </div>
+  </header>
+
+  <div class="form-card">
+    <form [formGroup]="patientForm" (ngSubmit)="onSubmit()">
+      
+      <div class="form-section">
+        <h3 class="section-title">Informações Pessoais</h3>
+        
+        <div class="form-grid">
+          <div class="form-group col-span-full">
+            <label for="name">Nome Completo <span class="required">*</span></label>
+            <input id="name" type="text" formControlName="name" placeholder="Ex: Maria da Silva" [class.is-invalid]="isFieldInvalid('name')" />
+            <div class="error-message" *ngIf="isFieldInvalid('name')">
+              Nome é obrigatório e deve ter no mínimo 3 caracteres.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="age">Idade <span class="required">*</span></label>
+            <input id="age" type="number" formControlName="age" placeholder="Ex: 34" [class.is-invalid]="isFieldInvalid('age')" />
+            <div class="error-message" *ngIf="isFieldInvalid('age')">
+              Idade inválida ou obrigatória.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="gender">Sexo <span class="required">*</span></label>
+            <div class="select-wrapper">
+              <select id="gender" formControlName="gender" [class.is-invalid]="isFieldInvalid('gender')">
+                <option value="" disabled selected>Selecione...</option>
+                <option value="Feminino">Feminino</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Outro">Outro</option>
+                <option value="Prefiro não informar">Prefiro não informar</option>
+              </select>
+              <svg class="select-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+            <div class="error-message" *ngIf="isFieldInvalid('gender')">
+              Sexo é obrigatório.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <div class="form-section">
+        <h3 class="section-title">Contato e Histórico</h3>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="phone">Telefone</label>
+            <input id="phone" type="tel" formControlName="phone" placeholder="(11) 99999-9999" [class.is-invalid]="isFieldInvalid('phone')" />
+            <div class="error-message" *ngIf="isFieldInvalid('phone')">
+              Formato de telefone inválido.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">E-mail</label>
+            <input id="email" type="email" formControlName="email" placeholder="paciente@exemplo.com" [class.is-invalid]="isFieldInvalid('email')" />
+            <div class="error-message" *ngIf="isFieldInvalid('email')">
+              E-mail inválido.
+            </div>
+          </div>
+
+          <div class="form-group col-span-full">
+            <label for="observations">Observações Iniciais</label>
+            <textarea id="observations" formControlName="observations" rows="4" placeholder="Alguma alergia, comorbidade ou detalhe relevante..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-error-alert" *ngIf="hasError()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        Ocorreu um erro ao tentar salvar o paciente. Verifique sua conexão e tente novamente.
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" routerLink="/patients" [disabled]="isSaving()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="isSaving()">
+          <span *ngIf="!isSaving()">Salvar Paciente</span>
+          <span *ngIf="isSaving()" class="loading-content">
+            <div class="spinner-small"></div> Salvando...
+          </span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- Toast Success Notification -->
+<div class="toast-container" [class.show]="showSuccessToast()">
+  <div class="toast-success">
+    <div class="icon-circle">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+    </div>
+    <div class="toast-text">
+      <h4>Sucesso!</h4>
+      <p>Paciente cadastrado com sucesso.</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,267 @@
+// Variables
+$primary: #0284c7; // Sky 600
+$primary-hover: #0369a1; // Sky 700
+$danger: #ef4444; // Red 500
+$danger-hover: #dc2626;
+
+// Modern dark-ish sleek look for recording
+.recording-dashboard {
+  background-color: #0f172a; // Slate 900 - dark theme for focus
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 100;
+  color: white;
+
+  .top-nav {
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+
+    .btn-cancel {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+
+      svg { width: 1.25rem; height: 1.25rem; }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+      }
+    }
+  }
+
+  .error-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+
+    .icon-circle {
+      width: 5rem;
+      height: 5rem;
+      border-radius: 50%;
+      background: rgba($danger, 0.2);
+      color: $danger;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      svg { width: 2.5rem; height: 2.5rem; }
+    }
+
+    h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+    p { color: #94a3b8; max-width: 400px; }
+    .mt-4 { margin-top: 2rem; }
+
+    .btn-primary {
+      background: $primary;
+      color: white;
+      padding: 0.75rem 2rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      &:hover { background: $primary-hover; }
+    }
+  }
+
+  .recorder-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 3rem;
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(255,255,255,0.1);
+      color: #94a3b8;
+      transition: all 0.3s;
+
+      &.recording {
+        background: rgba($danger, 0.15);
+        color: #fca5a5;
+        border: 1px solid rgba($danger, 0.3);
+
+        .dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: $danger;
+          animation: pulse 1.5s infinite;
+        }
+      }
+
+      &.paused {
+        background: rgba(234, 179, 8, 0.15);
+        color: #fde047;
+        border: 1px solid rgba(234, 179, 8, 0.3);
+      }
+
+      &.finished {
+        background: rgba(34, 197, 94, 0.15);
+        color: #86efac;
+      }
+    }
+
+    .timer-display {
+      font-size: 5rem;
+      font-weight: 300;
+      font-variant-numeric: tabular-nums;
+      color: white;
+      letter-spacing: -0.05em;
+      transition: color 0.3s;
+
+      &.paused {
+        color: #94a3b8;
+      }
+    }
+
+    .visualizer-container {
+      width: 100%;
+      max-width: 600px;
+      height: 120px;
+      position: relative;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 1rem;
+      overflow: hidden;
+
+      .audio-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .visualizer-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+
+        &.process {
+          background: rgba(15, 23, 42, 0.8);
+        }
+      }
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      transition: opacity 0.3s;
+
+      &.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      .btn-round {
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &.secondary {
+          background: rgba(255, 255, 255, 0.1);
+          color: white;
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.2);
+          }
+          svg { width: 2rem; height: 2rem; }
+        }
+      }
+
+      .btn-giant.finish {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: $danger;
+        color: white;
+        border: none;
+        padding: 1.25rem 2.5rem;
+        border-radius: 9999px;
+        font-size: 1.125rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 15px rgba($danger, 0.4);
+
+        .stop-square {
+          width: 1rem;
+          height: 1rem;
+          background: white;
+          border-radius: 2px;
+        }
+
+        &:hover {
+          background: $danger-hover;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba($danger, 0.5);
+        }
+      }
+    }
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner-small {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: transparent;
+  border-left-color: white;
+  border-right-color: white;
+  animation: spin 1s linear infinite;
+}
+
+:host {
+  display: block;
+}

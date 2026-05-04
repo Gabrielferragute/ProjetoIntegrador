@@ -1,0 +1,239 @@
+// Variables
+$primary: #0284c7; // Sky 600
+$primary-hover: #0369a1; // Sky 700
+$ai-color: #8b5cf6; // Violet 500
+$success: #10b981; // Emerald 500
+$surface: #ffffff;
+$border: #e2e8f0; // Slate 200
+$text-main: #0f172a; // Slate 900
+$text-muted: #64748b; // Slate 500
+$danger: #ef4444; // Red 500
+
+.processing-dashboard {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+
+  .state-container {
+    background: $surface;
+    padding: 3rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+
+    &.error {
+      .icon-circle {
+        width: 5rem;
+        height: 5rem;
+        border-radius: 50%;
+        background: rgba($danger, 0.1);
+        color: $danger;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem auto;
+        svg { width: 2.5rem; height: 2.5rem; }
+      }
+      h2 { color: $text-main; font-size: 1.5rem; margin-bottom: 0.5rem; }
+      p { color: $text-muted; }
+      .btn-primary {
+        margin-top: 1.5rem;
+        background: $primary;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        &:hover { background: $primary-hover; }
+      }
+    }
+  }
+
+  .processing-wrapper {
+    background: $surface;
+    padding: 4rem 3rem;
+    border-radius: 2rem;
+    box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.02);
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .ai-brain-animation {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        
+        &.outer {
+          border-top-color: rgba($ai-color, 0.2);
+          border-right-color: rgba($ai-color, 0.5);
+          border-bottom-color: rgba($ai-color, 0.2);
+          animation: spin 3s linear infinite;
+        }
+        
+        &.inner {
+          inset: 15px;
+          border-top-color: rgba($primary, 0.4);
+          border-left-color: rgba($primary, 0.8);
+          border-bottom-color: rgba($primary, 0.4);
+          animation: spin-reverse 2s linear infinite;
+        }
+      }
+
+      .core-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, $primary 0%, $ai-color 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        box-shadow: 0 0 20px rgba($ai-color, 0.4);
+        animation: pulse 2s ease-in-out infinite;
+
+        svg {
+          width: 32px;
+          height: 32px;
+        }
+      }
+    }
+
+    .title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: $text-main;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.025em;
+    }
+
+    .subtitle {
+      color: $text-muted;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 3rem;
+      max-width: 400px;
+    }
+
+    .steps-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+      text-align: left;
+
+      .step-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        border-radius: 1rem;
+        background: #f8fafc;
+        border: 1px solid $border;
+        transition: all 0.4s ease;
+
+        .indicator {
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          .dot {
+            width: 8px;
+            height: 8px;
+            background: #cbd5e1;
+            border-radius: 50%;
+          }
+
+          .spinner-mini {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba($ai-color, 0.2);
+            border-top-color: $ai-color;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+
+          .check-icon {
+            width: 20px;
+            height: 20px;
+            color: $success;
+          }
+        }
+
+        .label {
+          font-weight: 500;
+          color: $text-muted;
+          font-size: 0.95rem;
+          transition: color 0.3s;
+        }
+
+        &.active {
+          background: #ffffff;
+          border-color: rgba($ai-color, 0.3);
+          box-shadow: 0 4px 12px rgba($ai-color, 0.08);
+          transform: translateX(4px);
+          
+          .label {
+            color: $text-main;
+            font-weight: 600;
+          }
+        }
+
+        &.completed {
+          background: rgba($success, 0.05);
+          border-color: rgba($success, 0.2);
+
+          .label {
+            color: $text-main;
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spin-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 20px rgba($ai-color, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 35px rgba($ai-color, 0.6); }
+  100% { transform: scale(1); box-shadow: 0 0 20px rgba($ai-color, 0.4); }
+}
+
+:host {
+  display: block;
+}

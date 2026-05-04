@@ -1,0 +1,107 @@
+<div class="patient-dashboard">
+  <header class="dashboard-header">
+    <div class="header-titles">
+      <h1>Pacientes</h1>
+      <p>Gerencie o prontuário, consultas e histórico clínico.</p>
+    </div>
+    
+    <div class="header-actions">
+      <div class="search-box">
+        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Buscar paciente por nome..." 
+          [ngModel]="searchQuery()" 
+          (ngModelChange)="searchQuery.set($event)" 
+        />
+      </div>
+      <a routerLink="/patients/new" class="btn-primary">
+        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Novo Paciente
+      </a>
+    </div>
+  </header>
+
+  <div class="content-area">
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading()">
+      <div class="spinner"></div>
+      <p>Carregando prontuários...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state" *ngIf="hasError() && !isLoading()">
+      <svg class="icon-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+      </svg>
+      <h3>Falha na conexão</h3>
+      <p>Não foi possível conectar ao servidor para buscar os pacientes.</p>
+      <button class="btn-secondary" (click)="loadPatients()">Tentar novamente</button>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading() && !hasError() && filteredPatients().length === 0">
+      <div class="empty-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+      </div>
+      <h3>Nenhum paciente encontrado</h3>
+      <p *ngIf="searchQuery()">Não encontramos resultados para "{{searchQuery()}}".</p>
+      <p *ngIf="!searchQuery()">Seu cadastro de pacientes está vazio.</p>
+      <a routerLink="/patients/new" class="btn-primary mt-4" *ngIf="!searchQuery()">Cadastrar Primeiro Paciente</a>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container" *ngIf="!isLoading() && !hasError() && filteredPatients().length > 0">
+      <table class="clinical-table">
+        <thead>
+          <tr>
+            <th>Paciente</th>
+            <th>Idade</th>
+            <th>Sexo</th>
+            <th>Consultas</th>
+            <th>Última Consulta</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let patient of filteredPatients()" [routerLink]="['/patients', patient.id]" class="clickable-row">
+            <td>
+              <div class="patient-info">
+                <div class="avatar">{{ patient.name ? patient.name.charAt(0).toUpperCase() : '?' }}</div>
+                <div class="details">
+                  <span class="name">{{ patient.name || 'Paciente Sem Nome' }}</span>
+                  <span class="contact">{{ patient.email || patient.phone || 'Sem contato' }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge gray">{{ patient.age ? patient.age + ' anos' : '--' }}</span>
+            </td>
+            <td>
+              <span class="gender">{{ patient.gender || '--' }}</span>
+            </td>
+            <td>
+              <div class="consultation-count">
+                {{ patient.consultation_count || 0 }}
+              </div>
+            </td>
+            <td>
+              <span class="date">{{ patient.last_consultation_date ? (patient.last_consultation_date | date:'dd/MM/yyyy') : '--' }}</span>
+            </td>
+            <td class="actions">
+              <svg class="icon-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+              </svg>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

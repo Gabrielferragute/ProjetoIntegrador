@@ -1,0 +1,102 @@
+<div class="profile-dashboard">
+  
+  <header class="dashboard-header">
+    <div class="header-titles">
+      <a routerLink="/patients" class="back-link">
+        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Voltar para pacientes
+      </a>
+    </div>
+  </header>
+
+  <!-- Loading State -->
+  <div class="state-container" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <p>Carregando prontuário...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="state-container error" *ngIf="hasError() && !isLoading()">
+    <svg class="icon-error" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+    <h3>Erro ao carregar dados</h3>
+    <p>Não foi possível carregar as informações do paciente.</p>
+    <button class="btn-secondary" (click)="loadPatientData()">Tentar novamente</button>
+  </div>
+
+  <ng-container *ngIf="!isLoading() && !hasError() && patient() as p">
+    <!-- Header Block -->
+    <div class="profile-header-card">
+      <div class="patient-identity">
+        <div class="avatar">{{ p.name ? p.name.charAt(0).toUpperCase() : '?' }}</div>
+        <div class="identity-text">
+          <h1>{{ p.name }}</h1>
+          <div class="badges">
+            <span class="badge" *ngIf="p.age">{{ p.age }} anos</span>
+            <span class="badge" *ngIf="p.gender">{{ p.gender }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="quick-actions">
+        <button class="btn-primary" [routerLink]="['/patients', p.id, 'consultations', 'new']">
+          <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Nova Consulta
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="profile-grid">
+      
+      <!-- Patient Details Sidebar -->
+      <aside class="details-sidebar">
+        <div class="card details-card">
+          <h3>Informações de Contato</h3>
+          <div class="detail-row">
+            <span class="label">Telefone</span>
+            <span class="value">{{ p.phone || 'Não informado' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">E-mail</span>
+            <span class="value">{{ p.email || 'Não informado' }}</span>
+          </div>
+        </div>
+
+        <div class="card details-card">
+          <h3>Observações Iniciais</h3>
+          <p class="obs-text">{{ p.observations || 'Nenhuma observação registrada.' }}</p>
+        </div>
+      </aside>
+
+      <!-- Consultation History -->
+      <main class="history-main">
+        <div class="card history-card">
+          <div class="card-header">
+            <h2>Histórico Clínico</h2>
+            <span class="count-badge">{{ consultations().length }} registro(s)</span>
+          </div>
+
+          <!-- Empty History -->
+          <div class="empty-history" *ngIf="consultations().length === 0">
+            <div class="empty-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            </div>
+            <h4>Nenhuma consulta registrada</h4>
+            <p>Este paciente ainda não possui histórico clínico no sistema.</p>
+          </div>
+
+          <!-- History Timeline -->
+          <div class="timeline" *ngIf="consultations().length > 0">
+            <app-consultation-card 
+              *ngFor="let cons of consultations()" 
+              [consultation]="cons" 
+              [patientId]="patientId">
+            </app-consultation-card>
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+  </ng-container>
+
+</div>

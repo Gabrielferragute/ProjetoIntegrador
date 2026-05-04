@@ -1,0 +1,45 @@
+<div class="processing-dashboard">
+
+  <!-- Error View -->
+  <div class="state-container error" *ngIf="hasError()">
+    <div class="icon-circle error">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+    </div>
+    <h2>Falha no Processamento</h2>
+    <p>Houve um erro de comunicação com o servidor de Inteligência Artificial.</p>
+    <button class="btn-primary mt-4" (click)="retry()">Tentar Novamente</button>
+  </div>
+
+  <!-- Processing View -->
+  <div class="processing-wrapper" *ngIf="!hasError()">
+    
+    <div class="ai-brain-animation">
+      <div class="ring outer"></div>
+      <div class="ring inner"></div>
+      <div class="core-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+      </div>
+    </div>
+
+    <h1 class="title">IA analisando consulta</h1>
+    <p class="subtitle">O modelo está processando o áudio e gerando o laudo estruturado. Isso pode levar alguns segundos.</p>
+
+    <div class="steps-container">
+      <div class="step-item" *ngFor="let step of steps()" [ngClass]="step.status">
+        <div class="indicator">
+          <!-- Pending State -->
+          <div class="dot" *ngIf="step.status === 'pending'"></div>
+          
+          <!-- Active State -->
+          <div class="spinner-mini" *ngIf="step.status === 'active'"></div>
+          
+          <!-- Completed State -->
+          <svg *ngIf="step.status === 'completed'" class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+        </div>
+        <span class="label">{{ step.label }}</span>
+      </div>
+    </div>
+
+  </div>
+
+</div>

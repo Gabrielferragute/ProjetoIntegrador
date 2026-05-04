@@ -1,0 +1,97 @@
+<div class="report-dashboard">
+
+  <header class="dashboard-header">
+    <button class="back-btn" (click)="goBack()">
+      <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+      Voltar para Prontuário
+    </button>
+
+    <div class="header-actions">
+      <button class="btn-outline" *ngIf="!isEditing()" (click)="toggleEdit()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+        Editar Documento
+      </button>
+
+      <ng-container *ngIf="isEditing()">
+        <button class="btn-ghost" (click)="toggleEdit()" [disabled]="isSaving()">Cancelar</button>
+        <button class="btn-primary" (click)="saveReport()" [disabled]="isSaving()">
+          <span *ngIf="!isSaving()">Salvar Alterações</span>
+          <span *ngIf="isSaving()"><div class="spinner-mini"></div> Salvando...</span>
+        </button>
+      </ng-container>
+    </div>
+  </header>
+
+  <!-- Success Toast -->
+  <div class="toast-success" *ngIf="showSuccess()">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+    Laudo atualizado com sucesso.
+  </div>
+
+  <main class="document-container">
+    <div class="document-paper">
+      
+      <div class="doc-header">
+        <div class="brand">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          Laudo Médico Gerado por IA
+        </div>
+        <div class="doc-meta">
+          <span>Consulta #{{ consultationId || '001' }}</span>
+          <span>Emissão: {{ today | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+
+      <div class="doc-body" *ngIf="!isEditing()">
+        <section class="doc-section">
+          <h3>Identificação</h3>
+          <p>{{ report().identificacao }}</p>
+        </section>
+
+        <section class="doc-section">
+          <h3>Queixa Principal</h3>
+          <p>{{ report().queixa_principal }}</p>
+        </section>
+
+        <section class="doc-section">
+          <h3>História da Moléstia Atual (HMA)</h3>
+          <p>{{ report().historia }}</p>
+        </section>
+
+        <section class="doc-section">
+          <h3>Conduta Clínica</h3>
+          <p class="pre-line">{{ report().conduta }}</p>
+        </section>
+      </div>
+
+      <div class="doc-body editing" *ngIf="isEditing()">
+        <section class="doc-section">
+          <label>Identificação</label>
+          <textarea [(ngModel)]="editBuffer.identificacao" rows="2" class="form-input"></textarea>
+        </section>
+
+        <section class="doc-section">
+          <label>Queixa Principal</label>
+          <textarea [(ngModel)]="editBuffer.queixa_principal" rows="2" class="form-input"></textarea>
+        </section>
+
+        <section class="doc-section">
+          <label>História da Moléstia Atual (HMA)</label>
+          <textarea [(ngModel)]="editBuffer.historia" rows="4" class="form-input"></textarea>
+        </section>
+
+        <section class="doc-section">
+          <label>Conduta Clínica</label>
+          <textarea [(ngModel)]="editBuffer.conduta" rows="5" class="form-input"></textarea>
+        </section>
+      </div>
+
+      <div class="doc-footer">
+        <div class="signature-line">
+          <span>Assinatura do Médico</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

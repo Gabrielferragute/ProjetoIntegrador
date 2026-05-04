@@ -1,0 +1,326 @@
+// Variables
+$primary: #0284c7; // Sky 600
+$primary-hover: #0369a1; // Sky 700
+$surface: #ffffff;
+$border: #e2e8f0; // Slate 200
+$text-main: #0f172a; // Slate 900
+$text-muted: #64748b; // Slate 500
+$danger: #ef4444; // Red 500
+$danger-bg: #fef2f2;
+$success: #22c55e;
+$success-bg: #f0fdf4;
+
+.form-dashboard {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+
+  .dashboard-header {
+    margin-bottom: 2rem;
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: $text-muted;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+      transition: color 0.2s;
+
+      .icon {
+        width: 1rem;
+        height: 1rem;
+      }
+
+      &:hover {
+        color: $primary;
+      }
+    }
+
+    h1 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: $text-main;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.025em;
+    }
+    
+    p {
+      color: $text-muted;
+      font-size: 1rem;
+    }
+  }
+
+  .form-card {
+    background: $surface;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid $border;
+    overflow: hidden;
+    padding: 2rem;
+  }
+
+  .form-section {
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: $text-main;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+
+      .col-span-full {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+
+  .form-divider {
+    height: 1px;
+    background-color: $border;
+    margin: 2rem 0;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #334155;
+
+      .required {
+        color: $danger;
+      }
+    }
+
+    input, textarea, select {
+      padding: 0.625rem 1rem;
+      border: 1px solid $border;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      outline: none;
+      transition: all 0.2s;
+      color: $text-main;
+      background: $surface;
+      font-family: inherit;
+
+      &::placeholder {
+        color: #94a3b8;
+      }
+
+      &:focus {
+        border-color: $primary;
+        box-shadow: 0 0 0 3px rgba($primary, 0.1);
+      }
+
+      &.is-invalid {
+        border-color: $danger;
+        &:focus {
+          box-shadow: 0 0 0 3px rgba($danger, 0.1);
+        }
+      }
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .select-wrapper {
+      position: relative;
+      
+      select {
+        width: 100%;
+        appearance: none;
+        padding-right: 2.5rem;
+      }
+
+      .select-icon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1.25rem;
+        height: 1.25rem;
+        color: #94a3b8;
+        pointer-events: none;
+      }
+    }
+
+    .error-message {
+      font-size: 0.75rem;
+      color: $danger;
+      margin-top: 0.25rem;
+    }
+  }
+
+  .form-error-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background-color: $danger-bg;
+    color: #b91c1c;
+    border-radius: 0.5rem;
+    margin-top: 2rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      flex-shrink: 0;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid $border;
+
+    button {
+      padding: 0.625rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+
+    .btn-secondary {
+      background: white;
+      border: 1px solid $border;
+      color: $text-main;
+
+      &:hover:not(:disabled) {
+        background: #f8fafc;
+      }
+    }
+
+    .btn-primary {
+      background: $primary;
+      border: 1px solid transparent;
+      color: white;
+      min-width: 140px;
+
+      &:hover:not(:disabled) {
+        background: $primary-hover;
+      }
+
+      .loading-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+
+        .spinner-small {
+          width: 1rem;
+          height: 1rem;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-radius: 50%;
+          border-top-color: white;
+          animation: spin 1s linear infinite;
+        }
+      }
+    }
+  }
+}
+
+// Toast
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  transform: translateY(150%);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  &.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .toast-success {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid $success;
+
+    .icon-circle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: $success-bg;
+      color: $success;
+
+      svg {
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+    }
+
+    .toast-text {
+      h4 {
+        color: $text-main;
+        font-weight: 600;
+        font-size: 0.875rem;
+        margin-bottom: 0.125rem;
+      }
+      p {
+        color: $text-muted;
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// Responsive adjustments
+@media (max-width: 640px) {
+  .form-dashboard {
+    padding: 1.5rem 1rem;
+    
+    .form-card {
+      padding: 1.5rem;
+    }
+
+    .form-section .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+      flex-direction: column-reverse;
+      
+      button {
+        width: 100%;
+      }
+    }
+  }
+}

@@ -1,0 +1,85 @@
+<div class="consultation-start-dashboard">
+
+  <header class="dashboard-header">
+    <a [routerLink]="['/patients', patientId]" class="back-link">
+      <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+      Cancelar e Voltar ao Perfil
+    </a>
+  </header>
+
+  <!-- Loading State -->
+  <div class="state-container" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <p>Preparando ambiente...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="state-container error" *ngIf="hasError() && !isLoading()">
+    <svg class="icon-error" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+    <h3>Erro de carregamento</h3>
+    <p>Não foi possível identificar o paciente para esta consulta.</p>
+    <button class="btn-secondary" (click)="loadPatientData()">Tentar novamente</button>
+  </div>
+
+  <!-- Ready State -->
+  <main class="start-content" *ngIf="!isLoading() && !hasError() && patient() as p">
+    
+    <div class="patient-card">
+      <div class="avatar">{{ p.name ? p.name.charAt(0).toUpperCase() : '?' }}</div>
+      <div class="info">
+        <h2>{{ p.name }}</h2>
+        <span class="subtext">Identificação do Paciente</span>
+      </div>
+    </div>
+
+    <div class="action-card">
+      <h1 class="title">Nova Consulta</h1>
+      <p class="subtitle">O sistema irá registrar o áudio da sua interação com o paciente e gerar um laudo médico estruturado pela IA ao finalizar.</p>
+
+      <!-- Flow Explanation -->
+      <div class="process-flow">
+        <div class="flow-step">
+          <div class="step-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+          </div>
+          <span class="step-text">Gravação</span>
+        </div>
+        
+        <div class="flow-arrow">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-icon ai">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          </div>
+          <span class="step-text">IA</span>
+        </div>
+
+        <div class="flow-arrow">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          </div>
+          <span class="step-text">Laudo</span>
+        </div>
+      </div>
+
+      <button class="btn-giant" (click)="startConsultation()" [disabled]="isStarting()">
+        <span *ngIf="!isStarting()">
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          Iniciar Gravação
+        </span>
+        <span *ngIf="isStarting()" class="loading-content">
+          <div class="spinner-small"></div> Preparando...
+        </span>
+      </button>
+
+      <p class="helper-text">Certifique-se de que o microfone está ativado antes de começar.</p>
+    </div>
+
+  </main>
+</div>

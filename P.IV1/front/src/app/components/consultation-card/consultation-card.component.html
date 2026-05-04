@@ -1,0 +1,35 @@
+<div class="timeline-item">
+  <div class="timeline-marker" [ngClass]="consultation.status.toLowerCase()"></div>
+  <div class="timeline-content">
+    
+    <div class="content-header">
+      <div class="date-group">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <span class="date">{{ consultation.data | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <span class="status-badge" [ngClass]="consultation.status.toLowerCase()">{{ consultation.status }}</span>
+    </div>
+    
+    <div class="content-body">
+      <p class="summary" *ngIf="consultation.transcricao">
+        <strong>Resumo Breve:</strong> {{ consultation.transcricao | slice:0:150 }}{{ consultation.transcricao.length > 150 ? '...' : '' }}
+      </p>
+      <p class="summary empty" *ngIf="!consultation.transcricao">
+        Nenhum dado capturado nesta sessão.
+      </p>
+      
+      <div class="laudo-preview" *ngIf="consultation.laudo">
+        <svg class="icon-ai" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        <span>Laudo Estruturado por IA Disponível</span>
+      </div>
+    </div>
+
+    <div class="content-actions">
+      <button class="btn-outline" [routerLink]="['/patients', patientId, 'consultations', consultation.id, 'report']">
+        Abrir Detalhes do Laudo
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+      </button>
+    </div>
+
+  </div>
+</div>
