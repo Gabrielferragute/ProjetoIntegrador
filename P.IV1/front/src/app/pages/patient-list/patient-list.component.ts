@@ -1,16 +1,18 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, ChangeDetectionStrategy, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PatientService } from '../../services/patient.service';
 import { Patient } from '../../models/patient.model';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-patient-list',
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './patient-list.component.html',
-  styleUrls: ['./patient-list.component.scss']
+  styleUrls: ['./patient-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PatientListComponent implements OnInit {
   patients = signal<Patient[]>([]);
@@ -24,6 +26,8 @@ export class PatientListComponent implements OnInit {
     return this.patients().filter(p => p.name.toLowerCase().includes(query));
   });
 
+  private destroyRef = inject(DestroyRef);
+
   constructor(private patientService: PatientService) {}
 
   ngOnInit(): void {
@@ -33,8 +37,10 @@ export class PatientListComponent implements OnInit {
   loadPatients() {
     this.isLoading.set(true);
     this.hasError.set(false);
-    this.patientService.getPatients().subscribe({
-      next: (data) => {
+    this.patientService.getPatients()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
         // If data is null/undefined or not array, use []
         this.patients.set(Array.isArray(data) ? data : []);
         this.isLoading.set(false);

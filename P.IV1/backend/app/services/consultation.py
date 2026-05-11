@@ -65,7 +65,7 @@ class ConsultationService:
             
             # 2. Laudo
             report_generator = get_report_service()
-            patient_info = {"nome": patient.nome}
+            patient_info = {"name": patient.name}
             laudo_gerado = report_generator.generate_report(texto_transcrito, patient_info)
             
             # 3. Salva na consulta

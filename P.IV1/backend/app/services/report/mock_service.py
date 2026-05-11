@@ -8,14 +8,13 @@ class MockReportService(BaseReportService):
     sem depender de consumo imediato de IA externa.
     """
     def generate_report(self, transcription: str, patient_info: Optional[dict] = None) -> str:
-        # Simula o tempo de processamento do modelo
+        name = patient_info.get("name", "Paciente") if patient_info else "Paciente"
         time.sleep(1)
         
-        nome = patient_info.get("nome", "Paciente") if patient_info else "Paciente"
-        
         # Template fixo estruturado exigido
-        report = f"""### Identificação
-Nome: {nome}
+        return f"""
+### IDENTIFICAÇÃO
+Nome: {name}
 
 ### Queixa principal
 Cefaleia

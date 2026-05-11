@@ -1,15 +1,17 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
-import { PatientService } from '../../services/patient.service';
+import { ConsultationService } from '../../services/consultation.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-consultation-report',
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './consultation-report.component.html',
-  styleUrls: ['./consultation-report.component.scss']
+  styleUrls: ['./consultation-report.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConsultationReportComponent implements OnInit {
   patientId!: number;
@@ -36,7 +38,9 @@ export class ConsultationReportComponent implements OnInit {
     conduta: ''
   };
 
-  constructor(private route: ActivatedRoute, private router: Router, private patientService: PatientService) {}
+  private destroyRef = inject(DestroyRef);
+
+  constructor(private route: ActivatedRoute, private router: Router, private consultationService: ConsultationService) {}
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -45,8 +49,10 @@ export class ConsultationReportComponent implements OnInit {
     if (consParam) this.consultationId = +consParam;
 
     if (this.consultationId) {
-      this.patientService.getConsultation(this.consultationId).subscribe({
-        next: (consultation) => {
+      this.consultationService.getConsultation(this.consultationId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (consultation) => {
           if (consultation.laudo) {
             this.parseReportString(consultation.laudo);
           }
@@ -102,8 +108,10 @@ export class ConsultationReportComponent implements OnInit {
     // Convert back to string format
     const reportStr = `### Identificação\n${this.editBuffer.identificacao}\n\n### Queixa principal\n${this.editBuffer.queixa_principal}\n\n### História\n${this.editBuffer.historia}\n\n### Conduta\n${this.editBuffer.conduta}\n`;
 
-    this.patientService.updateConsultation(this.consultationId, { laudo: reportStr }).subscribe({
-      next: () => {
+    this.consultationService.updateConsultation(this.consultationId, { laudo: reportStr })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
         this.report.set({ ...this.editBuffer });
         this.isSaving.set(false);
         this.isEditing.set(false);

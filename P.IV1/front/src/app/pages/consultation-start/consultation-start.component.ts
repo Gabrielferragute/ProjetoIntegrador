@@ -1,15 +1,17 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { PatientService } from '../../services/patient.service';
 import { Patient } from '../../models/patient.model';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-consultation-start',
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './consultation-start.component.html',
-  styleUrls: ['./consultation-start.component.scss']
+  styleUrls: ['./consultation-start.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConsultationStartComponent implements OnInit {
   patientId!: number;
@@ -18,6 +20,8 @@ export class ConsultationStartComponent implements OnInit {
   isLoading = signal<boolean>(true);
   hasError = signal<boolean>(false);
   isStarting = signal<boolean>(false);
+
+  private destroyRef = inject(DestroyRef);
 
   constructor(
     private route: ActivatedRoute,
@@ -40,8 +44,10 @@ export class ConsultationStartComponent implements OnInit {
     this.isLoading.set(true);
     this.hasError.set(false);
 
-    this.patientService.getPatient(this.patientId).subscribe({
-      next: (data) => {
+    this.patientService.getPatient(this.patientId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
         this.patient.set(data);
         this.isLoading.set(false);
       },

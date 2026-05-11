@@ -6,12 +6,17 @@
         <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         Voltar para pacientes
       </a>
-      <h1>Novo Paciente</h1>
-      <p>Preencha as informações para cadastrar um novo paciente no sistema.</p>
+      <h1>{{ isEditMode() ? 'Editar Paciente' : 'Novo Paciente' }}</h1>
+      <p>{{ isEditMode() ? 'Atualize as informações do paciente selecionado.' : 'Preencha as informações para cadastrar um novo paciente no sistema.' }}</p>
     </div>
   </header>
 
-  <div class="form-card">
+  <div class="state-container" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <p>Carregando dados do paciente...</p>
+  </div>
+
+  <div class="form-card" *ngIf="!isLoading()">
     <form [formGroup]="patientForm" (ngSubmit)="onSubmit()">
       
       <div class="form-section">
@@ -30,7 +35,7 @@
             <label for="age">Idade <span class="required">*</span></label>
             <input id="age" type="number" formControlName="age" placeholder="Ex: 34" [class.is-invalid]="isFieldInvalid('age')" />
             <div class="error-message" *ngIf="isFieldInvalid('age')">
-              Idade inválida ou obrigatória.
+              Idade inválida ou obrigatória (0 a 150).
             </div>
           </div>
 
@@ -61,7 +66,7 @@
         <div class="form-grid">
           <div class="form-group">
             <label for="phone">Telefone</label>
-            <input id="phone" type="tel" formControlName="phone" placeholder="(11) 99999-9999" [class.is-invalid]="isFieldInvalid('phone')" />
+            <input id="phone" type="tel" formControlName="phone" placeholder="(11) 99999-9999" mask="(00) 00000-0000" [class.is-invalid]="isFieldInvalid('phone')" />
             <div class="error-message" *ngIf="isFieldInvalid('phone')">
               Formato de telefone inválido.
             </div>
@@ -84,14 +89,14 @@
 
       <div class="form-error-alert" *ngIf="hasError()">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-        Ocorreu um erro ao tentar salvar o paciente. Verifique sua conexão e tente novamente.
+        {{ errorMessage() }}
       </div>
 
       <div class="form-actions">
         <button type="button" class="btn-secondary" routerLink="/patients" [disabled]="isSaving()">
           Cancelar
         </button>
-        <button type="submit" class="btn-primary" [disabled]="isSaving()">
+        <button type="submit" class="btn-primary" [disabled]="isSaving() || patientForm.invalid">
           <span *ngIf="!isSaving()">Salvar Paciente</span>
           <span *ngIf="isSaving()" class="loading-content">
             <div class="spinner-small"></div> Salvando...

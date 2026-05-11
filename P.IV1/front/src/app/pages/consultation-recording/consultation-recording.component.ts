@@ -1,16 +1,18 @@
-import { Component, OnInit, OnDestroy, signal, ViewChild, ElementRef, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, ViewChild, ElementRef, computed, ChangeDetectionStrategy, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PatientService } from '../../services/patient.service';
-
-export type RecordingState = 'IDLE' | 'RECORDING' | 'PAUSED' | 'FINISHED' | 'ERROR';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ConsultationService } from '../../services/consultation.service';
+import { AudioRecordingService, RecordingState } from '../../services/audio-recording.service';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-consultation-recording',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './consultation-recording.component.html',
-  styleUrls: ['./consultation-recording.component.scss']
+  styleUrls: ['./consultation-recording.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConsultationRecordingComponent implements OnInit, OnDestroy {
   @ViewChild('audioCanvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
@@ -23,22 +25,22 @@ export class ConsultationRecordingComponent implements OnInit, OnDestroy {
   timeElapsed = signal<number>(0);
   formattedTime = computed(() => this.formatTime(this.timeElapsed()));
   
-  private mediaRecorder: MediaRecorder | null = null;
-  private audioChunks: Blob[] = [];
-  private audioContext: AudioContext | null = null;
   private analyser: AnalyserNode | null = null;
-  private microphone: MediaStreamAudioSourceNode | null = null;
-  private timerInterval: any;
+  private timerInterval: ReturnType<typeof setInterval> | null = null;
   private animationFrameId: number | null = null;
-  private stream: MediaStream | null = null;
+  private destroyRef = inject(DestroyRef);
 
-  constructor(private route: ActivatedRoute, private router: Router, private patientService: PatientService) {}
+  constructor(
+    private route: ActivatedRoute, 
+    private router: Router, 
+    private consultationService: ConsultationService,
+    private audioRecordingService: AudioRecordingService
+  ) {}
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       this.patientId = +idParam;
-      // Start recording automatically as they came from the "Start" screen
       this.startRecording();
     } else {
       this.state.set('ERROR');
@@ -50,116 +52,95 @@ export class ConsultationRecordingComponent implements OnInit, OnDestroy {
     this.cleanup();
   }
 
-  async startRecording() {
+  async startRecording(): Promise<void> {
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      this.setupAudioContext(this.stream);
+      await this.audioRecordingService.startRecording(() => {
+        // Callback if needed for chunks
+      });
       
-      this.mediaRecorder = new MediaRecorder(this.stream);
-      this.audioChunks = [];
+      const audioSetup = this.audioRecordingService.setupAudioContextForVisualizer();
+      if (audioSetup) {
+        this.analyser = audioSetup.analyser;
+      }
 
-      this.mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          this.audioChunks.push(e.data);
-        }
-      };
-
-      this.mediaRecorder.start(250); // get chunks every 250ms
       this.state.set('RECORDING');
       this.startTimer();
       
-      // Delay Canvas drawing slightly to ensure ViewChild is rendered since we start synchronously
       setTimeout(() => {
         this.drawAudioWave();
       }, 100);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       this.state.set('ERROR');
-      if (err.name === 'NotAllowedError') {
-        this.errorMessage.set('Acesso ao microfone negado. Permita o acesso no seu navegador.');
-      } else if (err.name === 'NotFoundError') {
-        this.errorMessage.set('Nenhum microfone encontrado.');
+      if (err instanceof Error) {
+        if (err.name === 'NotAllowedError') {
+          this.errorMessage.set('Acesso ao microfone negado. Permita o acesso no seu navegador.');
+        } else if (err.name === 'NotFoundError') {
+          this.errorMessage.set('Nenhum microfone encontrado.');
+        } else {
+          this.errorMessage.set('Erro desconhecido ao iniciar gravação de áudio.');
+        }
       } else {
-        this.errorMessage.set('Erro desconhecido ao iniciar gravação de áudio.');
+        this.errorMessage.set('Erro crítico no sistema de áudio.');
       }
       console.error(err);
     }
   }
 
-  togglePause() {
-    if (!this.mediaRecorder) return;
-
+  togglePause(): void {
     if (this.state() === 'RECORDING') {
-      this.mediaRecorder.pause();
+      this.audioRecordingService.pauseRecording();
+      this.audioRecordingService.suspendAudioContext();
       this.state.set('PAUSED');
       this.pauseTimer();
-      if (this.audioContext && this.audioContext.state === 'running') {
-        this.audioContext.suspend();
-      }
     } else if (this.state() === 'PAUSED') {
-      this.mediaRecorder.resume();
+      this.audioRecordingService.resumeRecording();
+      this.audioRecordingService.resumeAudioContext();
       this.state.set('RECORDING');
       this.startTimer();
-      if (this.audioContext && this.audioContext.state === 'suspended') {
-        this.audioContext.resume();
-      }
     }
   }
 
-  finishRecording() {
-    if (!this.mediaRecorder) return;
-    
-    this.mediaRecorder.onstop = () => {
-      const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-      
-      this.patientService.createConsultation({ paciente_id: this.patientId }).subscribe({
-        next: (consultation) => {
-          this.patientService.uploadConsultationAudio(consultation.id!, audioBlob).subscribe({
-            next: () => {
-              this.router.navigate(['/patients', this.patientId, 'consultations', consultation.id, 'process']);
-            },
-            error: (err) => {
-              console.error(err);
-              this.errorMessage.set("Erro no upload do áudio.");
-              this.state.set('ERROR');
-            }
-          });
-        },
-        error: (err) => {
-          console.error(err);
-          this.errorMessage.set("Erro ao criar consulta.");
-          this.state.set('ERROR');
-        }
-      });
-    };
-
-    if (this.mediaRecorder.state !== 'inactive') {
-      this.mediaRecorder.stop();
-    }
-    
+  async finishRecording(): Promise<void> {
     this.state.set('FINISHED');
     this.pauseTimer();
-    
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
+
+    try {
+      const audioBlob = await this.audioRecordingService.stopRecording();
+      
+      this.consultationService.createConsultation({ paciente_id: this.patientId })
+        .pipe(
+          switchMap(consultation => 
+            this.consultationService.uploadConsultationAudio(consultation.id!, audioBlob)
+          ),
+          takeUntilDestroyed(this.destroyRef)
+        )
+        .subscribe({
+          next: (updatedConsultation) => {
+            this.router.navigate(['/patients', this.patientId, 'consultations', updatedConsultation.id, 'process']);
+          },
+          error: (err: unknown) => {
+            console.error(err);
+            this.errorMessage.set('Erro no upload do áudio ou criação da consulta.');
+            this.state.set('ERROR');
+          }
+        });
+    } catch (err: unknown) {
+       console.error(err);
+       this.errorMessage.set('Erro ao processar o arquivo de áudio final.');
+       this.state.set('ERROR');
+    }
   }
 
-  cancelRecording() {
+  cancelRecording(): void {
     this.cleanup();
     this.router.navigate(['/patients', this.patientId]);
   }
 
-  private setupAudioContext(stream: MediaStream) {
-    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    this.analyser = this.audioContext.createAnalyser();
-    this.analyser.fftSize = 256;
-    
-    this.microphone = this.audioContext.createMediaStreamSource(stream);
-    this.microphone.connect(this.analyser);
-  }
-
-  private drawAudioWave = () => {
+  private drawAudioWave = (): void => {
     if (!this.canvasRef || !this.analyser) return;
 
     const canvas = this.canvasRef.nativeElement;
@@ -193,8 +174,8 @@ export class ConsultationRecordingComponent implements OnInit, OnDestroy {
       let x = 0;
 
       const gradient = canvasCtx.createLinearGradient(0, HEIGHT, 0, 0);
-      gradient.addColorStop(0, '#0284c7'); // primary
-      gradient.addColorStop(1, '#38bdf8'); // lighter
+      gradient.addColorStop(0, '#0284c7'); 
+      gradient.addColorStop(1, '#38bdf8'); 
 
       for (let i = 0; i < bufferLength; i++) {
         barHeight = (dataArray[i] / 255) * HEIGHT;
@@ -202,7 +183,6 @@ export class ConsultationRecordingComponent implements OnInit, OnDestroy {
         
         const r = barWidth / 2;
         canvasCtx.beginPath();
-        // Fallback for older browsers not supporting roundRect
         if (canvasCtx.roundRect) {
             canvasCtx.roundRect(x, HEIGHT - barHeight, barWidth - 1, barHeight, [r, r, 0, 0]);
         } else {
@@ -217,13 +197,13 @@ export class ConsultationRecordingComponent implements OnInit, OnDestroy {
     draw();
   };
 
-  private startTimer() {
+  private startTimer(): void {
     this.timerInterval = setInterval(() => {
       this.timeElapsed.update(v => v + 1);
     }, 1000);
   }
 
-  private pauseTimer() {
+  private pauseTimer(): void {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
@@ -235,18 +215,9 @@ export class ConsultationRecordingComponent implements OnInit, OnDestroy {
     return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
   }
 
-  private cleanup() {
+  private cleanup(): void {
     this.pauseTimer();
     if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
-    
-    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-      this.mediaRecorder.stop();
-    }
-    if (this.stream) {
-      this.stream.getTracks().forEach(track => track.stop());
-    }
-    if (this.audioContext && this.audioContext.state !== 'closed') {
-      this.audioContext.close();
-    }
+    this.audioRecordingService.cleanup();
   }
 }

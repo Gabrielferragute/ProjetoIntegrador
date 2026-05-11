@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, ChangeDetectionStrategy, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PatientService } from '../../services/patient.service';
+import { ConsultationService } from '../../services/consultation.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface ProcessStep {
   label: string;
@@ -13,7 +14,8 @@ interface ProcessStep {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './consultation-processing.component.html',
-  styleUrls: ['./consultation-processing.component.scss']
+  styleUrls: ['./consultation-processing.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConsultationProcessingComponent implements OnInit, OnDestroy {
   patientId!: number;
@@ -26,10 +28,11 @@ export class ConsultationProcessingComponent implements OnInit, OnDestroy {
     { label: 'Finalizando laudo médico', status: 'pending' }
   ]);
 
-  private timers: any[] = [];
-  private pollInterval: any;
+  private timers: ReturnType<typeof setTimeout>[] = [];
+  private pollInterval: ReturnType<typeof setInterval> | undefined;
+  private destroyRef = inject(DestroyRef);
 
-  constructor(private route: ActivatedRoute, private router: Router, private patientService: PatientService) {}
+  constructor(private route: ActivatedRoute, private router: Router, private consultationService: ConsultationService) {}
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -44,15 +47,17 @@ export class ConsultationProcessingComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.pollInterval) {
+    if (this.pollInterval !== undefined) {
       clearInterval(this.pollInterval);
     }
   }
 
   private pollBackendStatus() {
     this.pollInterval = setInterval(() => {
-      this.patientService.getConsultation(this.consultationId).subscribe({
-        next: (consultation) => {
+      this.consultationService.getConsultation(this.consultationId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (consultation) => {
           if (consultation.status === 'processando') {
             // Animamos os passos baseados no tempo (mock visual para o usuário não achar que travou)
             this.steps.update(steps => {
@@ -67,7 +72,7 @@ export class ConsultationProcessingComponent implements OnInit, OnDestroy {
               return [...steps];
             });
           } else if (consultation.status === 'finalizada' || consultation.status === 'concluída') {
-            clearInterval(this.pollInterval);
+            if (this.pollInterval !== undefined) clearInterval(this.pollInterval);
             this.steps.update(steps => {
               steps[0].status = 'completed';
               steps[1].status = 'completed';
@@ -78,13 +83,13 @@ export class ConsultationProcessingComponent implements OnInit, OnDestroy {
               this.router.navigate(['/patients', this.patientId, 'consultations', this.consultationId, 'report']);
             }, 800);
           } else if (consultation.status === 'erro_processamento') {
-            clearInterval(this.pollInterval);
+            if (this.pollInterval !== undefined) clearInterval(this.pollInterval);
             this.hasError.set(true);
           }
         },
         error: (err) => {
           console.error(err);
-          clearInterval(this.pollInterval);
+          if (this.pollInterval !== undefined) clearInterval(this.pollInterval);
           this.hasError.set(true);
         }
       });

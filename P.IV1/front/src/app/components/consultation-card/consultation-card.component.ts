@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Consultation } from '../../models/consultation.model';
@@ -8,7 +8,8 @@ import { Consultation } from '../../models/consultation.model';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './consultation-card.component.html',
-  styleUrls: ['./consultation-card.component.scss']
+  styleUrls: ['./consultation-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConsultationCardComponent {
   @Input({ required: true }) consultation!: Consultation;

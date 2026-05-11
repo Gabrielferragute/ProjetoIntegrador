@@ -24,3 +24,23 @@ button {
   font-family: inherit;
   border: none;
 }
+
+/* Global Loading Utilities */
+.spinner-small {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
+}
+
+.loading-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

@@ -14,12 +14,12 @@ class LLMReportService(BaseReportService):
         pass
 
     def generate_report(self, transcription: str, patient_info: Optional[dict] = None) -> str:
-        nome = patient_info.get("nome", "Paciente") if patient_info else "Paciente"
+        name = patient_info.get("name", "Paciente") if patient_info else "Paciente"
         
         # Exemplo de Engenharia de Prompt para o TCC:
         # prompt = f"""
         # Você é um assistente médico especialista. Baseado na transcrição abaixo, 
-        # extraia as informações e escreva um laudo clínico estruturado e formal para o paciente {nome}.
+        # extraia as informações e escreva um laudo clínico estruturado e formal para o paciente {name}.
         # Formate usando estritamente as seguintes seções (use Markdown):
         # ### IDENTIFICAÇÃO
         # ### QUEIXA PRINCIPAL

@@ -10,6 +10,7 @@ import { ConsultationReportComponent } from './pages/consultation-report/consult
 export const routes: Routes = [
   { path: 'patients', component: PatientListComponent },
   { path: 'patients/new', component: PatientFormComponent },
+  { path: 'patients/edit/:id', component: PatientFormComponent },
   { path: 'patients/:id', component: PatientProfileComponent },
   { path: 'patients/:id/consultations/new', component: ConsultationStartComponent },
   { path: 'patients/:id/consultations/record', component: ConsultationRecordingComponent },
