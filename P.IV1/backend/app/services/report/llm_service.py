@@ -1,41 +1,53 @@
+import google.generativeai as genai
 from app.services.report.base import BaseReportService
+from app.config import settings
 from typing import Optional
 
 class LLMReportService(BaseReportService):
     """
-    Implementação real que enviará a transcrição para um modelo de IA
-    (exemplo: OpenAI GPT-4, LLaMA, Gemini) para análise e criação inteligente
-    do laudo baseado nas melhores práticas médicas.
+    Implementação real que enviará a transcrição para o Google Gemini
+    para análise e criação inteligente do laudo médico.
     """
     def __init__(self):
-        # Para OpenAI:
-        # from openai import OpenAI
-        # self.client = OpenAI(api_key="SUA_CHAVE_AQUI")
-        pass
+        # Configura a chave de API usando a nossa variável de ambiente configurada
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+        # Utiliza o modelo gemini-2.5-flash atualizado (o modelo antigo 1.5 foi descontinuado pelo Google)
+        self.model = genai.GenerativeModel('gemini-2.5-flash')
 
     def generate_report(self, transcription: str, patient_info: Optional[dict] = None) -> str:
         name = patient_info.get("name", "Paciente") if patient_info else "Paciente"
         
-        # Exemplo de Engenharia de Prompt para o TCC:
-        # prompt = f"""
-        # Você é um assistente médico especialista. Baseado na transcrição abaixo, 
-        # extraia as informações e escreva um laudo clínico estruturado e formal para o paciente {name}.
-        # Formate usando estritamente as seguintes seções (use Markdown):
-        # ### IDENTIFICAÇÃO
-        # ### QUEIXA PRINCIPAL
-        # ### HISTÓRIA CLÍNICA
-        # ### CONDUTA
-        # 
-        # Transcrição do paciente:
-        # {transcription}
-        # """
+        prompt = f"""
+        Você é um assistente médico especialista de alta precisão. 
+        Sua tarefa é ler a transcrição de uma consulta médica e estruturar um laudo clínico formal e profissional para o paciente '{name}'.
         
-        # Exemplo de chamada real usando a biblioteca oficial da OpenAI:
-        # response = self.client.chat.completions.create(
-        #     model="gpt-4",
-        #     messages=[{"role": "user", "content": prompt}],
-        #     temperature=0.2 # Baixa temperatura para dados mais factuais e precisos
-        # )
-        # return response.choices[0].message.content
+        Você DEVE extrair as informações relevantes da transcrição e organizá-las ESTRITAMENTE nas 4 seções abaixo.
+        Utilize a formatação Markdown exata para os títulos (com 3 hashtags '### ' e a primeira letra maiúscula), pois o nosso sistema depende desta exata formatação para ler o seu retorno:
+
+        ### Identificação
+        (Inclua o nome do paciente, sexo, idade e outras informações de identificação, se mencionadas na consulta).
+
+        ### Queixa principal
+        (Resumo direto do motivo principal da consulta).
+
+        ### História
+        (Relato do paciente, evolução dos sintomas, comorbidades, alergias, etc., extraídos da consulta).
+
+        ### Conduta
+        (Orientações, medicamentos, exames pedidos ou recomendações dadas pelo médico na consulta).
+
+        IMPORTANTE: 
+        1. NÃO adicione nenhum título diferente destes.
+        2. NÃO invente dados. Se uma informação (como idade ou medicamentos) não estiver clara na transcrição, deixe vago ou não mencione.
+        3. Escreva de forma profissional, impessoal e médica.
         
-        return "Implementação de IA para o Laudo estruturado pronta! Falta apenas configurar a chave de API e descomentar."
+        Transcrição do áudio da consulta:
+        "{transcription}"
+        """
+        
+        print("Enviando requisição para a API do Google Gemini...")
+        response = self.model.generate_content(prompt)
+        print("Laudo gerado com sucesso pelo Gemini!")
+        
+        return response.text
+

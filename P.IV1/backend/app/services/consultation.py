@@ -77,6 +77,9 @@ class ConsultationService:
             self.update_consultation(consultation_id, update_data)
             
         except Exception as e:
+            import traceback
+            print(f"ERRO NO PROCESSAMENTO DA CONSULTA {consultation_id}:")
+            traceback.print_exc()
             # Em caso de erro, atualizamos o status
             self.update_consultation(consultation_id, ConsultationUpdate(status="erro_processamento"))
 

@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi import UploadFile, HTTPException, status
 
 UPLOAD_DIR = "uploads/audios"
-ALLOWED_EXTENSIONS = {"wav", "mp3", "m4a", "ogg"}
+ALLOWED_EXTENSIONS = {"wav", "mp3", "m4a", "ogg", "webm"}
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
